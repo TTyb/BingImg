@@ -6,6 +6,7 @@ import grequests
 import requests
 import re
 import time
+import os
 
 def geturl(urls):
 
@@ -38,15 +39,18 @@ if __name__ == '__main__':
     imgname = []
     while True:
         url = 'http://cn.bing.com/HPImageArchive.aspx?format=js&idx=' + str(i) + '&n=1'
-
+        urlPre = "http://cn.bing.com/"
         contents =get(url)
         data = contents.content.decode('utf-8', 'ignore')
         data = json.loads(data)
         try:
             onefile = data['images']
             for item in onefile:
-                img.append(item['url'])
-                imgname.append(item['copyright'].replace(' ', ''))
+                if len(img) > 0 and img[-1] == urlPre + item['url']:
+                    raise RuntimeError('testError')
+                else:
+                    img.append(urlPre + item['url'])
+                    imgname.append(item['copyright'].replace(' ', ''))
                 print(img[i])
             i = i + 1
         except Exception as err:
@@ -61,7 +65,7 @@ if __name__ == '__main__':
 
     j = 0
     for pic in pics:
-        filenamep = '../jpg/' + validateTitle(imgname[j] + '.jpg')
+        filenamep = os.path.abspath('.') + '/jpg/' + validateTitle(imgname[j] + '.jpg')
         filess = open(filenamep, 'wb')
         filess.write(pic.content)
         filess.close()
